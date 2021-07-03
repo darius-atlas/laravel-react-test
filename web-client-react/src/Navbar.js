@@ -1,0 +1,54 @@
+import React, { Component } from 'react';
+import { withOktaAuth } from '@okta/okta-react';
+
+import { Container, Menu } from 'semantic-ui-react';
+
+export default withOktaAuth(class Navbar extends Component {
+  constructor(props) {
+    super(props);
+    this.state = { authenticated: null };
+    this.checkAuthentication = this.checkAuthentication.bind(this);
+    this.login = this.login.bind(this);
+    this.logout = this.logout.bind(this);
+  }
+
+  async componentDidMount() {
+    this.checkAuthentication();
+  }
+
+  async componentDidUpdate() {
+    this.checkAuthentication();
+  }
+
+  async login() {
+    this.props.oktaAuth.signInWithRedirect();
+  }
+
+  async logout() {
+    this.props.oktaAuth.signOut('/');
+  }
+
+  async checkAuthentication() {
+    const authenticated = this.props.authState.isAuthenticated;
+    if (authenticated !== this.state.authenticated) {
+      this.setState({ authenticated });
+    }
+  }
+
+  render() {
+    return (
+      <div>
+        <Menu fixed="top" inverted>
+          <Container>
+            <Menu.Item as="a" header href="/">
+              Home
+            </Menu.Item>
+            {this.state.authenticated === true && <Menu.Item id="trivia-button" as="a" href="/trivia">Trivia Game</Menu.Item>}
+            {this.state.authenticated === true && <Menu.Item id="logout-button" as="a" onClick={this.logout}>Logout</Menu.Item>}
+            {this.state.authenticated === false && <Menu.Item as="a" onClick={this.login}>Login</Menu.Item>}
+          </Container>
+        </Menu>
+      </div>
+    );
+  }
+});
